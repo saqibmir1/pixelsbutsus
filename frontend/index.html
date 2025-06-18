@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Pixel Canvas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Pixel Canvas</h1>
+        <div class="stats">
+            <span id="users-count">Users: 0</span>
+            <span id="zoom-level">Zoom: 1x</span>
+            <span id="coordinates">X: 0, Y: 0</span>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="color-palette">
+            <div class="color" data-color="#FF0000" style="background-color: #FF0000;" title="Red"></div>
+            <div class="color" data-color="#00FF00" style="background-color: #00FF00;" title="Green"></div>
+            <div class="color" data-color="#0000FF" style="background-color: #0000FF;" title="Blue"></div>
+            <div class="color" data-color="#FFFF00" style="background-color: #FFFF00;" title="Yellow"></div>
+            <div class="color" data-color="#FF8000" style="background-color: #FF8000;" title="Orange"></div>
+            <div class="color" data-color="#8000FF" style="background-color: #8000FF;" title="Purple"></div>
+            <div class="color" data-color="#FF00FF" style="background-color: #FF00FF;" title="Magenta"></div>
+            <div class="color" data-color="#00FFFF" style="background-color: #00FFFF;" title="Cyan"></div>
+            <div class="color" data-color="#000000" style="background-color: #000000;" title="Black"></div>
+            <div class="color" data-color="#808080" style="background-color: #808080;" title="Gray"></div>
+            <div class="color selected" data-color="#FFFFFF" style="background-color: #FFFFFF;" title="White"></div>
+        </div>
+        <button id="eraser-btn" class="tool-btn">🧽 Eraser</button>
+        <div class="selected-color-display">
+            <div id="selected-color" style="background-color: #FFFFFF;"></div>
+        </div>
+    </div>
+
+    <div class="canvas-container" id="canvas-container">
+        <canvas id="pixel-canvas"></canvas>
+    </div>
+
+    <div class="instructions">
+        <p>🖱️ Click to place pixels • 🖱️ Drag to pan • 🖱️ Scroll to zoom • 📱 Touch & pinch on mobile</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

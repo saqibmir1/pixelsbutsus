@@ -1,0 +1,240 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.header h1 {
+    color: #333;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.stats span {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: 500;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    gap: 20px;
+    flex-wrap: wrap;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.color-palette {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.color {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.color:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.color.selected {
+    border-color: #333;
+    transform: scale(1.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.tool-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tool-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tool-btn.active {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+}
+
+.selected-color-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#selected-color {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 3px solid #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.canvas-container {
+    flex: 1;
+    overflow: hidden;
+    cursor: crosshair;
+    position: relative;
+    background: #f0f0f0;
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    min-height: 0; /* Important for flex child */
+}
+
+.canvas-container.panning {
+    cursor: grabbing;
+}
+
+#pixel-canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.instructions {
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .stats {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .toolbar {
+        padding: 10px;
+        justify-content: center;
+    }
+    
+    .color {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .instructions {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .canvas-container {
+        touch-action: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    .color {
+        width: 30px;
+        height: 30px;
+    }
+    
+    #selected-color {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .tool-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+}
+
+/* Loading animation */
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+    font-size: 18px;
+}
+
+/* Connection status */
+.connection-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 1000;
+}
+
+.connection-status.connected {
+    background: #4caf50;
+    color: white;
+}
+
+.connection-status.disconnected {
+    background: #f44336;
+    color: white;
+}
