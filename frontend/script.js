@@ -6,10 +6,10 @@ class PixelCanvas {
         
         // Canvas settings
         this.gridSize = 1000; // 1000x1000 grid
-        this.pixelSize = 10; // Each pixel is 10x10 pixels on screen at 1x zoom
-        this.zoom = 1;
-        this.minZoom = 0.1;
-        this.maxZoom = 5;
+        this.pixelSize = 1;   // Each pixel = 1x1 screen pixel at 1x zoom
+        this.zoom = 1;        // Will be adjusted in resizeCanvas()
+        this.minZoom = 1;
+        this.maxZoom = 30;
         
         // Pan settings
         this.offsetX = 0;
