@@ -8,8 +8,8 @@ class PixelCanvas {
         this.gridSize = 1000; // 1000x1000 grid
         this.pixelSize = 10; // Each pixel is 10x10 pixels on screen at 1x zoom
         this.zoom = 1;
-        this.minZoom = 0.5;
-        this.maxZoom = 4;
+        this.minZoom = 0.1;
+        this.maxZoom = 5;
         
         // Pan settings
         this.offsetX = 0;
@@ -19,7 +19,7 @@ class PixelCanvas {
         this.lastPanY = 0;
         
         // Drawing settings
-        this.selectedColor = '#FFFFFF';
+        this.selectedColor = '#000000';
         this.isErasing = false;
         this.pixels = new Map(); // Store pixels as "x,y" -> color
         
