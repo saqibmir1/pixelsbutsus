@@ -229,29 +229,61 @@ class PixelCanvas {
         this.zoomAt(mouseX, mouseY, delta);
     }
     
-    handleTouchStart(e) {
-        this.touches = Array.from(e.touches);
-        
-        if (this.touches.length === 1) {
-            const touch = this.touches[0];
-            const rect = this.canvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            const gridPos = this.screenToGrid(x, y);
-            if (this.isValidGridPosition(gridPos.x, gridPos.y)) {
-                this.placePixel(gridPos.x, gridPos.y);
-            }
-        } else if (this.touches.length === 2) {
-            this.lastTouchDistance = this.getTouchDistance();
-        }
-    }
+ // Replace the touch handling methods in your PixelCanvas class with these:
+
+handleTouchStart(e) {
+    this.touches = Array.from(e.touches);
     
-    handleTouchMove(e) {
-        this.touches = Array.from(e.touches);
+    if (this.touches.length === 1) {
+        const touch = this.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
         
-        if (this.touches.length === 2) {
-            const currentDistance = this.getTouchDistance();
+        // Start tracking for potential pan or pixel placement
+        this.touchStartTime = Date.now();
+        this.touchStartX = x;
+        this.touchStartY = y;
+        this.touchMoved = false;
+        
+    } else if (this.touches.length === 2) {
+        // Two finger touch - prepare for pinch zoom
+        this.lastTouchDistance = this.getTouchDistance();
+        this.touchStartTime = null; // Cancel any single touch actions
+    }
+}
+
+handleTouchMove(e) {
+    this.touches = Array.from(e.touches);
+    
+    if (this.touches.length === 1) {
+        const touch = this.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        // Check if this is a significant movement (more than 10px)
+        const moveDistance = Math.sqrt(
+            Math.pow(x - this.touchStartX, 2) + 
+            Math.pow(y - this.touchStartY, 2)
+        );
+        
+        if (moveDistance > 10) {
+            this.touchMoved = true;
+            
+            // Start panning if not already panning
+            if (!this.isPanning) {
+                this.startPan(this.touchStartX, this.touchStartY);
+            }
+            
+            // Continue panning
+            this.updatePan(x, y);
+        }
+        
+    } else if (this.touches.length === 2) {
+        // Two finger pinch zoom
+        const currentDistance = this.getTouchDistance();
+        if (this.lastTouchDistance > 0) {
             const scale = currentDistance / this.lastTouchDistance;
             
             const centerX = (this.touches[0].clientX + this.touches[1].clientX) / 2;
@@ -259,16 +291,39 @@ class PixelCanvas {
             const rect = this.canvas.getBoundingClientRect();
             
             this.zoomAt(centerX - rect.left, centerY - rect.top, scale);
-            this.lastTouchDistance = currentDistance;
         }
+        this.lastTouchDistance = currentDistance;
     }
+}
+
+handleTouchEnd(e) {
+    this.touches = Array.from(e.touches);
     
-    handleTouchEnd(e) {
-        this.touches = Array.from(e.touches);
-        if (this.touches.length < 2) {
-            this.lastTouchDistance = 0;
+    if (this.touches.length === 0) {
+        // All fingers lifted
+        if (this.isPanning) {
+            this.endPan();
+        } else if (!this.touchMoved && this.touchStartTime) {
+            // This was a tap (not a drag) - place a pixel
+            const timeDiff = Date.now() - this.touchStartTime;
+            if (timeDiff < 300) { // Only if tap was quick (under 300ms)
+                const gridPos = this.screenToGrid(this.touchStartX, this.touchStartY);
+                if (this.isValidGridPosition(gridPos.x, gridPos.y)) {
+                    this.placePixel(gridPos.x, gridPos.y);
+                }
+            }
         }
+        
+        // Reset touch tracking
+        this.touchStartTime = null;
+        this.touchMoved = false;
+        this.lastTouchDistance = 0;
+        
+    } else if (this.touches.length < 2) {
+        // One finger remaining, reset pinch zoom
+        this.lastTouchDistance = 0;
     }
+}
     
     getTouchDistance() {
         if (this.touches.length < 2) return 0;
