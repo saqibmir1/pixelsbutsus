@@ -116,8 +116,8 @@ app.post('/api/pixel', async (req, res) => {
             return res.status(400).json({ error: 'Invalid input data' });
         }
         
-        // Validate coordinates (0-999 for 1000x1000 grid)
-        if (x < 0 || x >= 1000 || y < 0 || y >= 1000) {
+        // Validate coordinates (0-999 for 3000x3000 grid)
+        if (x < 0 || x >= 3000 || y < 0 || y >= 3000) {
             return res.status(400).json({ error: 'Coordinates out of bounds' });
         }
         
@@ -149,7 +149,7 @@ app.delete('/api/pixel', async (req, res) => {
         }
         
         // Validate coordinates
-        if (x < 0 || x >= 1000 || y < 0 || y >= 1000) {
+        if (x < 0 || x >= 3000 || y < 0 || y >= 3000) {
             return res.status(400).json({ error: 'Coordinates out of bounds' });
         }
         
@@ -177,7 +177,7 @@ app.get('/api/stats', async (req, res) => {
         res.json({
             totalPixels: pixelCount,
             activeUsers: userCount,
-            canvasSize: '1000x1000'
+            canvasSize: '3000x3000'
         });
     } catch (error) {
         console.error('Error fetching stats:', error);

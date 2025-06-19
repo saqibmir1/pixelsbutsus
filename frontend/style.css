@@ -36,6 +36,7 @@ body {
     gap: 20px;
     font-size: 14px;
     color: #555;
+    margin-right: 100px;
 }
 
 .stats span {
@@ -88,8 +89,8 @@ body {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
+    background: white;
+    color: black;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
@@ -103,7 +104,7 @@ body {
 }
 
 .tool-btn.active {
-    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    background: linear-gradient(45deg, #db7575, #d15e34);
 }
 
 .selected-color-display {
