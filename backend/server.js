@@ -6,6 +6,7 @@ const path = require('path');
 const { 
     initializeDatabase, 
     getAllPixels, 
+    getPixelInfo,
     setPixel, 
     deletePixel, 
     getPixelCount 
@@ -63,12 +64,14 @@ function broadcastUserCount() {
 }
 
 // Broadcast pixel update to all connected clients
-function broadcastPixelUpdate(x, y, color) {
+function broadcastPixelUpdate(x, y, color, insertedBy, updatedAt) {
     const message = JSON.stringify({
         type: 'pixel_update',
         x,
         y,
-        color
+        color,
+        insertedBy,
+        updatedAt
     });
     
     clients.forEach(client => {
@@ -95,8 +98,8 @@ function broadcastPixelDelete(x, y) {
 
 // API Routes
 
-// Get all pixels
-app.get('/api/pixels', async (req, res) => {
+// Get all pixels with metadata
+app.get('/api/pixels-with-metadata', async (req, res) => {
     try {
         const pixels = await getAllPixels();
         res.json(pixels);
@@ -109,7 +112,7 @@ app.get('/api/pixels', async (req, res) => {
 // Place or update a pixel
 app.post('/api/pixel', async (req, res) => {
     try {
-        const { x, y, color } = req.body;
+        const { x, y, color, insertedBy } = req.body;
         
         // Validate input
         if (typeof x !== 'number' || typeof y !== 'number' || typeof color !== 'string') {
@@ -126,10 +129,10 @@ app.post('/api/pixel', async (req, res) => {
             return res.status(400).json({ error: 'Invalid color format' });
         }
         
-        const pixel = await setPixel(x, y, color);
+        const pixel = await setPixel(x, y, color, insertedBy || 'Anonymous');
         
-        // Broadcast to all connected clients
-        broadcastPixelUpdate(x, y, color);
+        // Broadcast to all connected clients with metadata
+        broadcastPixelUpdate(x, y, color, insertedBy || 'Anonymous', pixel.updatedAt);
         
         res.json(pixel);
     } catch (error) {
