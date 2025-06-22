@@ -12,7 +12,7 @@
     <div class="header">
         <h1>Sus Pixels<small style="color: red; font-size: x-small;"> (beta)</small></h1>
         <div class="stats">
-            <span id="users-count">Users: 0</span>
+            <span id="users-count">Users Connected: 0</span>
             <span id="zoom-level">Zoom: 1x</span>
             <span id="coordinates">X: 0, Y: 0</span>
         </div>
@@ -63,6 +63,19 @@
     <div class="instructions">
         <p>🖱️ Click to place pixels • 🖱️ Drag to pan • 🖱️ Scroll to zoom • 📱 Touch & pinch on mobile</p>
     </div>
+
+     <!-- Name Modal -->
+    <div id="name-modal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome to Sus Pixels!</h2>
+            <p>Please enter your name to start placing pixels:</p>
+            <input type="text" id="username-input" placeholder="Your name" maxlength="20">
+            <button id="submit-name">Submit</button>
+        </div>
+    </div>
+
+    <!-- Pixel Info Tooltip -->
+    <div id="pixel-info" class="pixel-info"></div>
 
     <script src="script.js"></script>
 </body>

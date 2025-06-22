@@ -4,6 +4,7 @@ class PixelCanvas {
         this.ctx = this.canvas.getContext('2d');
         this.container = document.getElementById('canvas-container');
         
+        // Canvas settings
         this.gridSize = 3000;
         this.pixelSize = 1;
         this.zoom = 0.3;
@@ -21,6 +22,7 @@ class PixelCanvas {
         this.selectedColor = '#000000';
         this.isErasing = false;
         this.pixels = new Map();
+        this.pixelMetadata = new Map();
         
         // WebSocket
         this.ws = null;
@@ -34,6 +36,15 @@ class PixelCanvas {
         this.touchStartX = 0;
         this.touchStartY = 0;
         this.touchMoved = false;
+
+        // Pixel info hover
+        this.pixelInfoTimeout = null
+
+        // user name
+        this.userName = localStorage.getItem('pixelUserName') || '';
+        if(!this.userName) {
+            this.initNameModal();
+        }
         
         this.init();
     }
@@ -44,6 +55,40 @@ class PixelCanvas {
         this.connectWebSocket();
         this.loadPixels();
         this.centerCanvas();
+    }
+
+    initNameModal() {
+        const modal = document.getElementById('name-modal');
+        const input = document.getElementById('username-input');
+        const submitBtn = document.getElementById('submit-name');
+
+        modal.style.display = 'block';
+        input.focus();
+
+        const handleSubmit = () => {
+            const name = input.value.trim();
+            if (name) {
+                this.userName = name;
+                localStorage.setItem('pixelUserName', name);
+                modal.style.display = 'none';
+                
+                // Remove event listeners after submission
+                submitBtn.removeEventListener('click', handleSubmit);
+                input.removeEventListener('keypress', handleKeyPress);
+            } else {
+                alert('Please enter a valid name');
+                input.focus();
+            }
+        };
+
+        const handleKeyPress = (e) => {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        };
+
+        submitBtn.addEventListener('click', handleSubmit);
+        input.addEventListener('keypress', handleKeyPress);
     }
     
     setupCanvas() {
@@ -133,14 +178,18 @@ class PixelCanvas {
     handleWebSocketMessage(data) {
         switch (data.type) {
             case 'pixel_update':
-                this.updatePixel(data.x, data.y, data.color);
+                this.updatePixel(data.x, data.y, data.color, {
+                    color: data.color,
+                    insertedBy: data.insertedBy,
+                    updatedAt: data.updatedAt
+                });
                 break;
             case 'pixel_delete':
                 this.deletePixel(data.x, data.y);
                 break;
             case 'user_count':
                 this.userCount = data.count;
-                document.getElementById('users-count').textContent = `Users: ${this.userCount}`;
+                document.getElementById('users-count').textContent = `Users Connected: ${this.userCount}`;
                 break;
         }
     }
@@ -164,12 +213,19 @@ class PixelCanvas {
     
     async loadPixels() {
         try {
-            const response = await fetch('/api/pixels');
+            const response = await fetch('/api/pixels-with-metadata');
             const pixels = await response.json();
             
             this.pixels.clear();
+            this.pixelMetadata.clear();
+            
             pixels.forEach(pixel => {
                 this.pixels.set(`${pixel.x},${pixel.y}`, pixel.color);
+                this.pixelMetadata.set(`${pixel.x},${pixel.y}`, {
+                    color: pixel.color,
+                    insertedBy: pixel.insertedBy,
+                    updatedAt: pixel.updatedAt
+                });
             });
             
             this.render();
@@ -201,6 +257,16 @@ class PixelCanvas {
         const gridPos = this.screenToGrid(x, y);
         document.getElementById('coordinates').textContent = `X: ${gridPos.x}, Y: ${gridPos.y}`;
         
+        // Update pixel info position
+        this.updatePixelInfoPosition(e.clientX, e.clientY);
+        
+        // Only show info if this pixel exists in our metadata
+        if (this.pixelMetadata.has(`${gridPos.x},${gridPos.y}`)) {
+            this.showPixelInfo(gridPos.x, gridPos.y);
+        } else {
+            this.hidePixelInfo();
+        }
+        
         if (this.isPanning) {
             this.updatePan(x, y);
         }
@@ -213,6 +279,7 @@ class PixelCanvas {
     }
     
     handleMouseLeave() {
+        this.hidePixelInfo();
         if (this.isPanning) {
             this.endPan();
         }
@@ -429,7 +496,12 @@ class PixelCanvas {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ x, y, color })
+            body: JSON.stringify({ 
+                x, 
+                y, 
+                color,
+                insertedBy: this.userName
+            })
         });
         
         if (!response.ok) {
@@ -451,14 +523,64 @@ class PixelCanvas {
         }
     }
     
-    updatePixel(x, y, color) {
+       updatePixel(x, y, color, metadata = null) {
         this.pixels.set(`${x},${y}`, color);
+        
+        if (metadata) {
+            this.pixelMetadata.set(`${x},${y}`, metadata);
+        } else if (this.pixelMetadata.has(`${x},${y}`)) {
+            const existing = this.pixelMetadata.get(`${x},${y}`);
+            existing.color = color;
+            this.pixelMetadata.set(`${x},${y}`, existing);
+        }
+        
         this.renderPixel(x, y, color);
     }
     
     deletePixel(x, y) {
         this.pixels.delete(`${x},${y}`);
+        this.pixelMetadata.delete(`${x},${y}`);
         this.clearPixel(x, y);
+    }
+    
+    showPixelInfo(x, y) {
+        if (this.pixelInfoTimeout) {
+            clearTimeout(this.pixelInfoTimeout);
+            this.pixelInfoTimeout = null;
+        }
+
+        const pixelKey = `${x},${y}`;
+        
+        if (this.pixelMetadata.has(pixelKey)) {
+            this.pixelInfoTimeout = setTimeout(() => {
+                const data = this.pixelMetadata.get(pixelKey);
+                const pixelInfo = document.getElementById('pixel-info');
+                
+                pixelInfo.innerHTML = `
+                    <div><strong>Position:</strong> ${x}, ${y}</div>
+                    <div><strong>Color:</strong> <span style="color:${data.color}">${data.color}</span></div>
+                    <div><strong>Placed by:</strong> ${data.insertedBy || 'Anonymous'}</div>
+                    <div><strong>Last updated:</strong> ${new Date(data.updatedAt).toLocaleString()}</div>
+                `;
+                pixelInfo.style.display = 'block';
+            }, 1000);
+        }
+    }
+    
+    hidePixelInfo() {
+        if (this.pixelInfoTimeout) {
+            clearTimeout(this.pixelInfoTimeout);
+            this.pixelInfoTimeout = null;
+        }
+        
+        const pixelInfo = document.getElementById('pixel-info');
+        pixelInfo.style.display = 'none';
+    }
+    
+    updatePixelInfoPosition(x, y) {
+        const pixelInfo = document.getElementById('pixel-info');
+        pixelInfo.style.left = `${x + 10}px`;
+        pixelInfo.style.top = `${y + 10}px`;
     }
     
     render() {
