@@ -6,76 +6,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sus Pixels</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="header">
-        <h1>Sus Pixels<small style="color: red; font-size: x-small;"> (beta)</small></h1>
-        <div class="stats">
-            <span id="users-count">Users Connected: 0</span>
-            <span id="zoom-level">Zoom: 1x</span>
-            <span id="coordinates">X: 0, Y: 0</span>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-left">
+                <h1>Sus Pixels<small class="beta-badge">BETA</small></h1>
+                <div class="connection-status">
+                    <div class="status-indicator connected"></div>
+                    <span id="users-count">0 online</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats">
+                    <div class="stat-item" id="zoom-level">
+                        <i class="fas fa-search"></i>
+                        <span>100%</span>
+                    </div>
+                    <div class="stat-item" id="coordinates">
+                        <i class="fas fa-crosshairs"></i>
+                        <span>0, 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="tool-section">
+                    <button id="eraser-btn" class="tool-btn">
+                        <i class="fas fa-eraser"></i>
+                        <span>Eraser</span>
+                    </button>
+                    <div class="selected-color-display">
+                        <div class="color-label">Selected:</div>
+                        <div id="selected-color" style="background-color: #000000;"></div>
+                    </div>
+                </div>
+                
+                <div class="color-palette-container">
+                    <div class="palette-header">
+                        <span>Colors</span>
+                        <div class="palette-actions">
+                            <button class="palette-scroll-btn scroll-left"><i class="fas fa-chevron-left"></i></button>
+                            <button class="palette-scroll-btn scroll-right"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="color-palette">
+                        <!-- Grayscale -->
+                        <div class="color-group">
+                            <div class="color selected" data-color="#000000" style="background-color: #000000;" title="Black"></div>
+                            <div class="color" data-color="#212121" style="background-color: #212121;" title="Eerie Black"></div>
+                            <div class="color" data-color="#424242" style="background-color: #424242;" title="Gray"></div>
+                            <div class="color" data-color="#616161" style="background-color: #616161;" title="Granite Gray"></div>
+                            <div class="color" data-color="#757575" style="background-color: #757575;" title="Sonic Silver"></div>
+                            <div class="color" data-color="#9E9E9E" style="background-color: #9E9E9E;" title="Spanish Gray"></div>
+                            <div class="color" data-color="#BDBDBD" style="background-color: #BDBDBD;" title="French Gray"></div>
+                            <div class="color" data-color="#E0E0E0" style="background-color: #E0E0E0;" title="Platinum"></div>
+                            <div class="color" data-color="#EEEEEE" style="background-color: #EEEEEE;" title="Bright Gray"></div>
+                            <div class="color" data-color="#F5F5F5" style="background-color: #F5F5F5;" title="Cultured"></div>
+                            <div class="color" data-color="#FFFFFF" style="background-color: #FFFFFF;" title="White"></div>
+                        </div>
+                        
+                        <!-- Reds/Pinks -->
+                        <div class="color-group">
+                            <div class="color" data-color="#FFEBEE" style="background-color: #FFEBEE;" title="Misty Rose"></div>
+                            <div class="color" data-color="#FFCDD2" style="background-color: #FFCDD2;" title="Pink"></div>
+                            <div class="color" data-color="#EF9A9A" style="background-color: #EF9A9A;" title="Salmon Pink"></div>
+                            <div class="color" data-color="#E57373" style="background-color: #E57373;" title="Light Coral"></div>
+                            <div class="color" data-color="#EF5350" style="background-color: #EF5350;" title="Coral"></div>
+                            <div class="color" data-color="#F44336" style="background-color: #F44336;" title="Red"></div>
+                            <div class="color" data-color="#E53935" style="background-color: #E53935;" title="Cinnabar"></div>
+                            <div class="color" data-color="#D32F2F" style="background-color: #D32F2F;" title="Fire Engine Red"></div>
+                            <div class="color" data-color="#C62828" style="background-color: #C62828;" title="Dark Red"></div>
+                            <div class="color" data-color="#B71C1C" style="background-color: #B71C1C;" title="Blood Red"></div>
+                            <div class="color" data-color="#FF4081" style="background-color: #FF4081;" title="Raspberry Pink"></div>
+                            <div class="color" data-color="#F50057" style="background-color: #F50057;" title="Fuchsia"></div>
+                            <div class="color" data-color="#C2185B" style="background-color: #C2185B;" title="Dogwood Rose"></div>
+                            <div class="color" data-color="#880E4F" style="background-color: #880E4F;" title="Dark Pink"></div>
+                        </div>
+                        
+                        <!-- Oranges -->
+                        <div class="color-group">
+                            <div class="color" data-color="#FFF3E0" style="background-color: #FFF3E0;" title="Seashell"></div>
+                            <div class="color" data-color="#FFE0B2" style="background-color: #FFE0B2;" title="Peach"></div>
+                            <div class="color" data-color="#FFCC80" style="background-color: #FFCC80;" title="Topaz"></div>
+                            <div class="color" data-color="#FFB74D" style="background-color: #FFB74D;" title="Sandy Brown"></div>
+                            <div class="color" data-color="#FFA726" style="background-color: #FFA726;" title="Yellow Orange"></div>
+                            <div class="color" data-color="#FF9800" style="background-color: #FF9800;" title="Orange"></div>
+                            <div class="color" data-color="#FB8C00" style="background-color: #FB8C00;" title="Dark Orange"></div>
+                            <div class="color" data-color="#F57C00" style="background-color: #F57C00;" title="Pumpkin"></div>
+                            <div class="color" data-color="#EF6C00" style="background-color: #EF6C00;" title="Spanish Orange"></div>
+                            <div class="color" data-color="#E65100" style="background-color: #E65100;" title="Burnt Orange"></div>
+                            <div class="color" data-color="#FF5722" style="background-color: #FF5722;" title="Red Orange"></div>
+                            <div class="color" data-color="#E64A19" style="background-color: #E64A19;" title="Vermilion"></div>
+                            <div class="color" data-color="#D84315" style="background-color: #D84315;" title="Persimmon"></div>
+                            <div class="color" data-color="#BF360C" style="background-color: #BF360C;" title="Rust"></div>
+                        </div>
+                        
+                        <!-- Yellows -->
+                        <div class="color-group">
+                            <div class="color" data-color="#FFFDE7" style="background-color: #FFFDE7;" title="Ivory"></div>
+                            <div class="color" data-color="#FFF9C4" style="background-color: #FFF9C4;" title="Lemon Chiffon"></div>
+                            <div class="color" data-color="#FFF59D" style="background-color: #FFF59D;" title="Pastel Yellow"></div>
+                            <div class="color" data-color="#FFF176" style="background-color: #FFF176;" title="Dandelion"></div>
+                            <div class="color" data-color="#FFEE58" style="background-color: #FFEE58;" title="Lemon Yellow"></div>
+                            <div class="color" data-color="#FFEB3B" style="background-color: #FFEB3B;" title="Yellow"></div>
+                            <div class="color" data-color="#FDD835" style="background-color: #FDD835;" title="Saffron"></div>
+                            <div class="color" data-color="#FBC02D" style="background-color: #FBC02D;" title="Banana Yellow"></div>
+                            <div class="color" data-color="#F9A825" style="background-color: #F9A825;" title="Orange Yellow"></div>
+                            <div class="color" data-color="#F57F17" style="background-color: #F57F17;" title="School Bus Yellow"></div>
+                        </div>
+                        
+                        <!-- Greens -->
+                        <div class="color-group">
+                            <div class="color" data-color="#E8F5E9" style="background-color: #E8F5E9;" title="Honeydew"></div>
+                            <div class="color" data-color="#C8E6C9" style="background-color: #C8E6C9;" title="Tea Green"></div>
+                            <div class="color" data-color="#A5D6A7" style="background-color: #A5D6A7;" title="Celadon"></div>
+                            <div class="color" data-color="#81C784" style="background-color: #81C784;" title="Light Green"></div>
+                            <div class="color" data-color="#66BB6A" style="background-color: #66BB6A;" title="Emerald"></div>
+                            <div class="color" data-color="#4CAF50" style="background-color: #4CAF50;" title="Green"></div>
+                            <div class="color" data-color="#43A047" style="background-color: #43A047;" title="Apple Green"></div>
+                            <div class="color" data-color="#388E3C" style="background-color: #388E3C;" title="Forest Green"></div>
+                            <div class="color" data-color="#2E7D32" style="background-color: #2E7D32;" title="Dartmouth Green"></div>
+                            <div class="color" data-color="#1B5E20" style="background-color: #1B5E20;" title="Dark Green"></div>
+                            <div class="color" data-color="#8BC34A" style="background-color: #8BC34A;" title="Pistachio"></div>
+                            <div class="color" data-color="#7CB342" style="background-color: #7CB342;" title="Bud Green"></div>
+                            <div class="color" data-color="#689F38" style="background-color: #689F38;" title="Olive Drab"></div>
+                            <div class="color" data-color="#558B2F" style="background-color: #558B2F;" title="Maximum Green"></div>
+                            <div class="color" data-color="#33691E" style="background-color: #33691E;" title="Lincoln Green"></div>
+                        </div>
+                        
+                        <!-- Blues -->
+                        <div class="color-group">
+                            <div class="color" data-color="#E3F2FD" style="background-color: #E3F2FD;" title="Alice Blue"></div>
+                            <div class="color" data-color="#BBDEFB" style="background-color: #BBDEFB;" title="Baby Blue"></div>
+                            <div class="color" data-color="#90CAF9" style="background-color: #90CAF9;" title="Light Sky Blue"></div>
+                            <div class="color" data-color="#64B5F6" style="background-color: #64B5F6;" title="Sky Blue"></div>
+                            <div class="color" data-color="#42A5F5" style="background-color: #42A5F5;" title="Blue Jeans"></div>
+                            <div class="color" data-color="#2196F3" style="background-color: #2196F3;" title="Dodger Blue"></div>
+                            <div class="color" data-color="#1E88E5" style="background-color: #1E88E5;" title="Azure"></div>
+                            <div class="color" data-color="#1976D2" style="background-color: #1976D2;" title="Denim"></div>
+                            <div class="color" data-color="#1565C0" style="background-color: #1565C0;" title="Sapphire"></div>
+                            <div class="color" data-color="#0D47A1" style="background-color: #0D47A1;" title="Cobalt Blue"></div>
+                            <div class="color" data-color="#82B1FF" style="background-color: #82B1FF;" title="Light Cobalt Blue"></div>
+                            <div class="color" data-color="#448AFF" style="background-color: #448AFF;" title="Ultramarine"></div>
+                            <div class="color" data-color="#2979FF" style="background-color: #2979FF;" title="Blue"></div>
+                            <div class="color" data-color="#2962FF" style="background-color: #2962FF;" title="Royal Blue"></div>
+                        </div>
+                        
+                        <!-- Purples/Violets -->
+                        <div class="color-group">
+                            <div class="color" data-color="#EDE7F6" style="background-color: #EDE7F6;" title="Lavender"></div>
+                            <div class="color" data-color="#D1C4E9" style="background-color: #D1C4E9;" title="Light Pastel Purple"></div>
+                            <div class="color" data-color="#B39DDB" style="background-color: #B39DDB;" title="Lilac"></div>
+                            <div class="color" data-color="#9575CD" style="background-color: #9575CD;" title="Lavender Purple"></div>
+                            <div class="color" data-color="#7E57C2" style="background-color: #7E57C2;" title="Medium Purple"></div>
+                            <div class="color" data-color="#673AB7" style="background-color: #673AB7;" title="Purple"></div>
+                            <div class="color" data-color="#5E35B1" style="background-color: #5E35B1;" title="Royal Purple"></div>
+                            <div class="color" data-color="#512DA8" style="background-color: #512DA8;" title="Dark Slate Blue"></div>
+                            <div class="color" data-color="#4527A0" style="background-color: #4527A0;" title="Rebecca Purple"></div>
+                            <div class="color" data-color="#311B92" style="background-color: #311B92;" title="Persian Indigo"></div>
+                            <div class="color" data-color="#B388FF" style="background-color: #B388FF;" title="Light Violet"></div>
+                            <div class="color" data-color="#7C4DFF" style="background-color: #7C4DFF;" title="Violet"></div>
+                            <div class="color" data-color="#651FFF" style="background-color: #651FFF;" title="Electric Violet"></div>
+                            <div class="color" data-color="#6200EA" style="background-color: #6200EA;" title="Dark Violet"></div>
+                        </div>
+                        
+                        <!-- Browns -->
+                        <div class="color-group">
+                            <div class="color" data-color="#EFEBE9" style="background-color: #EFEBE9;" title="Isabelline"></div>
+                            <div class="color" data-color="#D7CCC8" style="background-color: #D7CCC8;" title="Light French Beige"></div>
+                            <div class="color" data-color="#BCAAA4" style="background-color: #BCAAA4;" title="Khaki"></div>
+                            <div class="color" data-color="#A1887F" style="background-color: #A1887F;" title="Cinereous"></div>
+                            <div class="color" data-color="#8D6E63" style="background-color: #8D6E63;" title="Beaver"></div>
+                            <div class="color" data-color="#795548" style="background-color: #795548;" title="Raw Umber"></div>
+                            <div class="color" data-color="#6D4C41" style="background-color: #6D4C41;" title="Coffee"></div>
+                            <div class="color" data-color="#5D4037" style="background-color: #5D4037;" title="Dark Brown"></div>
+                            <div class="color" data-color="#4E342E" style="background-color: #4E342E;" title="Seal Brown"></div>
+                            <div class="color" data-color="#3E2723" style="background-color: #3E2723;" title="Bistre"></div>
+                        </div>
+                        
+                        <!-- Skin tones -->
+                        <div class="color-group">
+                            <div class="color" data-color="#FFE9D5" style="background-color: #FFE9D5;" title="Very Pale Orange"></div>
+                            <div class="color" data-color="#FFD3B5" style="background-color: #FFD3B5;" title="Peach Puff"></div>
+                            <div class="color" data-color="#F8C8A0" style="background-color: #F8C8A0;" title="Deep Peach"></div>
+                            <div class="color" data-color="#F5B78E" style="background-color: #F5B78E;" title="Mellow Apricot"></div>
+                            <div class="color" data-color="#E6A67C" style="background-color: #E6A67C;" title="Fawn"></div>
+                            <div class="color" data-color="#D49A6A" style="background-color: #D49A6A;" title="Earth Yellow"></div>
+                            <div class="color" data-color="#C78B5D" style="background-color: #C78B5D;" title="Deer"></div>
+                            <div class="color" data-color="#B07D56" style="background-color: #B07D56;" title="Camel"></div>
+                            <div class="color" data-color="#9C6F4E" style="background-color: #9C6F4E;" title="Liver Chestnut"></div>
+                            <div class="color" data-color="#8B5A3C" style="background-color: #8B5A3C;" title="Coconut"></div>
+                            <div class="color" data-color="#7A4B35" style="background-color: #7A4B35;" title="Russet"></div>
+                            <div class="color" data-color="#6A3D2E" style="background-color: #6A3D2E;" title="Pullman Brown"></div>
+                            <div class="color" data-color="#5A2F27" style="background-color: #5A2F27;" title="Caput Mortuum"></div>
+                            <div class="color" data-color="#4A2121" style="background-color: #4A2121;" title="Dark Sienna"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="pixel-canvas"></canvas>
+                <div class="canvas-overlay" id="canvas-overlay"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="instructions">
+                <div class="instruction-item">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <span>Click to place pixels</span>
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-hand-paper"></i>
+                    <span>Drag to pan</span>
+                </div>
+                <div class="instruction-item">
+                    <i class="fas fa-search"></i>
+                    <span>Scroll to zoom</span>
+                </div>
+                <div class="instruction-item mobile-only">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Touch & pinch on mobile</span>
+                </div>
+            </div>
+            <div class="footer-right">
+                <button class="footer-btn" id="help-btn">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help</span>
+                </button>
+                <button class="footer-btn" id="share-btn">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="toolbar">
-        <div class="color-palette">
-            <div class="color" data-color="#808080" style="background-color: #808080;" title="Gray"></div>
-            <div class="color" data-color="#C0C0C0" style="background-color: #C0C0C0;" title="Light Gray"></div>
-            <div class="color" data-color="#FF0000" style="background-color: #FF0000;" title="Red"></div>
-            <div class="color" data-color="#800000" style="background-color: #800000;" title="Dark Red"></div>
-            <div class="color" data-color="#FFA07A" style="background-color: #FFA07A;" title="Light Salmon"></div>
-            <div class="color" data-color="#FFA500" style="background-color: #FFA500;" title="Orange"></div>
-            <div class="color" data-color="#FF8000" style="background-color: #FF8000;" title="Dark Orange"></div>
-            <div class="color" data-color="#8B4513" style="background-color: #8B4513;" title="Saddle Brown"></div>
-            <div class="color" data-color="#FFFF00" style="background-color: #FFFF00;" title="Yellow"></div>
-            <div class="color" data-color="#CCCC00" style="background-color: #CCCC00;" title="Dark Yellow"></div>
-            <div class="color" data-color="#00FF00" style="background-color: #00FF00;" title="Lime"></div>
-            <div class="color" data-color="#008000" style="background-color: #008000;" title="Dark Green"></div>
-            <div class="color" data-color="#ADFF2F" style="background-color: #ADFF2F;" title="Green Yellow"></div>
-            <div class="color" data-color="#00FFFF" style="background-color: #00FFFF;" title="Cyan"></div>
-            <div class="color" data-color="#008B8B" style="background-color: #008B8B;" title="Dark Cyan"></div>
-            <div class="color" data-color="#0000FF" style="background-color: #0000FF;" title="Blue"></div>
-            <div class="color" data-color="#000080" style="background-color: #000080;" title="Navy"></div>
-            <div class="color" data-color="#87CEFA" style="background-color: #87CEFA;" title="Light Sky Blue"></div>
-            <div class="color" data-color="#8000FF" style="background-color: #8000FF;" title="Purple"></div>
-            <div class="color" data-color="#4B0082" style="background-color: #4B0082;" title="Indigo"></div>
-            <div class="color" data-color="#DA70D6" style="background-color: #DA70D6;" title="Orchid"></div>
-            <div class="color" data-color="#FF69B4" style="background-color: #FF69B4;" title="Hot Pink"></div>
-            <div class="color" data-color="#FFC0CB" style="background-color: #FFC0CB;" title="Pink"></div>
-            <div class="color" data-color="#FAD8B0" style="background-color: #FAD8B0;" title="Light Skin"></div>
-            <div class="color" data-color="#E0AC69" style="background-color: #E0AC69;" title="Medium Skin"></div>
-            <div class="color" data-color="#8D5524" style="background-color: #8D5524;" title="Dark Skin"></div>
-            <div class="color" data-color="#404040" style="background-color: #404040;" title="Dark Gray Shadow"></div>
-
-            <div class="color selected" data-color="#000000" style="background-color: #000000;" title="Black"></div>
-        </div>
-        <button id="eraser-btn" class="tool-btn">🧽 Eraser</button>
-        <div class="selected-color-display">
-            <div id="selected-color" style="background-color: #000000;"></div>
-        </div>
-    </div>
-
-    <div class="canvas-container" id="canvas-container">
-        <canvas id="pixel-canvas"></canvas>
-    </div>
-
-    <div class="instructions">
-        <p>🖱️ Click to place pixels • 🖱️ Drag to pan • 🖱️ Scroll to zoom • 📱 Touch & pinch on mobile</p>
-    </div>
-
-     <!-- Name Modal -->
+    <!-- Name Modal -->
     <div id="name-modal" class="modal">
         <div class="modal-content">
-            <h2>Welcome to Sus Pixels!</h2>
-            <p>Please enter your name to start placing pixels:</p>
-            <input type="text" id="username-input" placeholder="Your name" maxlength="20">
-            <button id="submit-name">Submit</button>
+            <div class="modal-header">
+                <h2>Welcome to Sus Pixels!</h2>
+                <p>Collaborate with others in real-time to create pixel art</p>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="username-input">Choose your name:</label>
+                    <input type="text" id="username-input" placeholder="Artist name" maxlength="20">
+                    <div class="input-hint">Max 20 characters</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="submit-name" class="primary-btn">
+                    <span>Start Creating</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Pixel Info Tooltip -->
-    <div id="pixel-info" class="pixel-info"></div>
+    <div id="pixel-info" class="pixel-info">
+        <div class="pixel-color" id="pixel-info-color"></div>
+        <div class="pixel-details">
+            <div class="pixel-coords" id="pixel-info-coords"></div>
+            <div class="pixel-author" id="pixel-info-author"></div>
+            <div class="pixel-time" id="pixel-info-time"></div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
