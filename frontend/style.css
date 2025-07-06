@@ -352,6 +352,108 @@ body {
     animation: modalFadeIn var(--transition-slow) ease;
 }
 
+/* Chat Widget */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.chat-toggle {
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-600);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.chat-toggle i {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.chat-toggle:hover {
+    background-color: var(--primary-700);
+    transform: scale(1.1);
+}
+
+.chat-container {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+}
+
+.chat-container iframe {
+    flex: 1;
+    border: none;
+    background: transparent;
+}
+
+.chat-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--gray-200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.chat-close i {
+    color: var(--gray-700);
+    font-size: 1rem;
+}
+
+.chat-widget.expanded .chat-container {
+    display: flex;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .chat-widget {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .chat-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chat-container {
+        width: calc(100vw - 30px);
+        height: 400px;
+        bottom: 65px;
+        right: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-container {
+        height: 350px;
+    }
+}
+
 @keyframes modalFadeIn {
     from {
         opacity: 0;
