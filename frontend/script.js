@@ -21,8 +21,10 @@ class PixelCanvas {
         // Drawing settings
         this.selectedColor = '#000000';
         this.isErasing = false;
+        this.isColorPickerMode = false;
         this.pixels = new Map();
         this.pixelMetadata = new Map();
+        this.recentColors = JSON.parse(localStorage.getItem('recentColors') || JSON.stringify(['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF']));
 
         // WebSocket
         this.ws = null;
@@ -38,9 +40,9 @@ class PixelCanvas {
         this.touchMoved = false;
 
         // Pixel info hover
-        this.pixelInfoTimeout = null
+        this.pixelInfoTimeout = null;
 
-        // user name
+        // User name
         this.userName = localStorage.getItem('pixelUserName') || '';
         if (!this.userName) {
             this.initNameModal();
@@ -52,9 +54,11 @@ class PixelCanvas {
     init() {
         this.setupCanvas();
         this.setupEventListeners();
+        this.setupColorPicker();
         this.connectWebSocket();
         this.loadPixels();
         this.centerCanvas();
+        this.render();
     }
 
     initNameModal() {
@@ -71,8 +75,6 @@ class PixelCanvas {
                 this.userName = name;
                 localStorage.setItem('pixelUserName', name);
                 modal.style.display = 'none';
-
-                // Remove event listeners after submission
                 submitBtn.removeEventListener('click', handleSubmit);
                 input.removeEventListener('keypress', handleKeyPress);
             } else {
@@ -110,26 +112,11 @@ class PixelCanvas {
     }
 
     setupEventListeners() {
-        // Color palette
-        document.querySelectorAll('.color').forEach(colorEl => {
-            colorEl.addEventListener('click', (e) => {
-                document.querySelector('.color.selected')?.classList.remove('selected');
-                e.target.classList.add('selected');
-                this.selectedColor = e.target.dataset.color;
-                this.isErasing = false;
-                document.getElementById('eraser-btn').classList.remove('active');
-                document.getElementById('selected-color').style.backgroundColor = this.selectedColor;
-            });
-        });
-
         // Eraser tool
         document.getElementById('eraser-btn').addEventListener('click', () => {
             this.isErasing = !this.isErasing;
             document.getElementById('eraser-btn').classList.toggle('active', this.isErasing);
-            if (this.isErasing) {
-                document.querySelector('.color.selected')?.classList.remove('selected');
-                document.getElementById('selected-color').style.backgroundColor = 'transparent';
-            }
+            document.getElementById('selected-color').style.backgroundColor = this.isErasing ? 'transparent' : this.selectedColor;
         });
 
         // Mouse events
@@ -146,93 +133,107 @@ class PixelCanvas {
         this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
     }
 
-    connectWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}`;
-
-        this.ws = new WebSocket(wsUrl);
-
-        this.ws.onopen = () => {
-            this.connected = true;
-            this.updateConnectionStatus();
-        };
-
-        this.ws.onclose = () => {
-            this.connected = false;
-            this.updateConnectionStatus();
-            setTimeout(() => this.connectWebSocket(), 3000);
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            this.connected = false;
-            this.updateConnectionStatus();
-        };
-
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            this.handleWebSocketMessage(data);
-        };
-    }
-
-    handleWebSocketMessage(data) {
-        switch (data.type) {
-            case 'pixel_update':
-                this.updatePixel(data.x, data.y, data.color, {
-                    color: data.color,
-                    insertedBy: data.insertedBy,
-                    updatedAt: data.updatedAt
-                });
-                break;
-            case 'pixel_delete':
-                this.deletePixel(data.x, data.y);
-                break;
-            case 'user_count':
-                this.userCount = data.count;
-                // Update to match new HTML structure
-                const usersCountEl = document.getElementById('users-count');
-                if (usersCountEl) {
-                    usersCountEl.textContent = `${data.count} online`;
+    setupColorPicker() {
+        // Color picker button
+        document.getElementById('color-wheel-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const modal = document.getElementById('color-picker-modal');
+            const colorWheel = document.getElementById('color-wheel');
+            const hexInput = document.getElementById('color-hex-input');
+            
+            colorWheel.value = this.selectedColor;
+            hexInput.value = this.selectedColor;
+            modal.style.display = 'block';
+            
+            colorWheel.addEventListener('input', () => {
+                hexInput.value = colorWheel.value;
+            });
+            
+            hexInput.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    colorWheel.value = e.target.value;
                 }
-                break;
-        }
-    }
-
-    updateConnectionStatus() {
-        const statusEl = document.querySelector('.status-indicator');
-        const connectionText = document.querySelector('.connection-status span');
-
-        if (!statusEl || !connectionText) return;
-
-        if (this.connected) {
-            statusEl.className = 'status-indicator connected';
-            connectionText.textContent = `${this.userCount} online`;
-        } else {
-            statusEl.className = 'status-indicator disconnected';
-            connectionText.textContent = 'offline';
-        }
-    }
-
-    async loadPixels() {
-        try {
-            const response = await fetch('/api/pixels-with-metadata');
-            const pixels = await response.json();
-
-            this.pixels.clear();
-            this.pixelMetadata.clear();
-
-            pixels.forEach(pixel => {
-                this.pixels.set(`${pixel.x},${pixel.y}`, pixel.color);
-                this.pixelMetadata.set(`${pixel.x},${pixel.y}`, {
-                    color: pixel.color,
-                    insertedBy: pixel.insertedBy,
-                    updatedAt: pixel.updatedAt
-                });
             });
 
-            this.render();
-        } catch (error) {
-            console.error('Failed to load pixels:', error);
+            const confirmHandler = () => {
+                if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) {
+                    this.selectedColor = hexInput.value.toUpperCase();
+                    document.getElementById('selected-color').style.backgroundColor = this.selectedColor;
+                    this.isErasing = false;
+                    document.getElementById('eraser-btn').classList.remove('active');
+                    this.addRecentColor(this.selectedColor);
+                }
+                modal.style.display = 'none';
+                document.getElementById('confirm-color-btn').removeEventListener('click', confirmHandler);
+            };
+
+            document.getElementById('confirm-color-btn').addEventListener('click', confirmHandler);
+
+            // Close modal when clicking outside
+            const modalClickHandler = (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    modal.removeEventListener('click', modalClickHandler);
+                    document.getElementById('confirm-color-btn').removeEventListener('click', confirmHandler);
+                }
+            };
+            modal.addEventListener('click', modalClickHandler);
+        });
+
+        // Color picker mode button
+        document.getElementById('color-picker-btn').addEventListener('click', () => {
+            this.toggleColorPickerMode();
+        });
+    }
+
+    addRecentColor(color) {
+        this.recentColors = this.recentColors.filter(c => c !== color);
+        this.recentColors.unshift(color);
+        if (this.recentColors.length > 10) {
+            this.recentColors = this.recentColors.slice(0, 10);
+        }
+        localStorage.setItem('recentColors', JSON.stringify(this.recentColors));
+    }
+
+    toggleColorPickerMode() {
+        this.isColorPickerMode = !this.isColorPickerMode;
+        const pickerBtn = document.getElementById('color-picker-btn');
+        pickerBtn.classList.toggle('active', this.isColorPickerMode);
+        this.canvas.style.cursor = this.isColorPickerMode ? 'crosshair' : '';
+
+        if (this.isColorPickerMode) {
+            const indicator = document.createElement('div');
+            indicator.className = 'color-picker-mode';
+            indicator.textContent = 'Click on a pixel to pick its color';
+            indicator.id = 'color-picker-indicator';
+            document.body.appendChild(indicator);
+        } else {
+            const indicator = document.getElementById('color-picker-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+    }
+
+    handlePixelColorPick(x, y) {
+        const pixelKey = `${x},${y}`;
+        if (this.pixels.has(pixelKey)) {
+            const color = this.pixels.get(pixelKey);
+            this.selectedColor = color;
+            document.getElementById('selected-color').style.backgroundColor = color;
+            this.addRecentColor(color);
+            this.isErasing = false;
+            document.getElementById('eraser-btn').classList.remove('active');
+
+            const indicator = document.getElementById('color-picker-indicator');
+            if (indicator) {
+                indicator.textContent = `Picked color: ${color}`;
+                setTimeout(() => {
+                    if (this.isColorPickerMode && indicator) {
+                        indicator.textContent = 'Click on a pixel to pick its color';
+                    }
+                }, 1000);
+            }
         }
     }
 
@@ -244,7 +245,12 @@ class PixelCanvas {
         if (e.button === 0) {
             const gridPos = this.screenToGrid(x, y);
             if (this.isValidGridPosition(gridPos.x, gridPos.y)) {
-                this.placePixel(gridPos.x, gridPos.y);
+                if (this.isColorPickerMode) {
+                    this.handlePixelColorPick(gridPos.x, gridPos.y);
+                    this.toggleColorPickerMode();
+                } else {
+                    this.placePixel(gridPos.x, gridPos.y);
+                }
             }
         } else if (e.button === 2) {
             this.startPan(x, y);
@@ -257,12 +263,10 @@ class PixelCanvas {
         const y = e.clientY - rect.top;
 
         const gridPos = this.screenToGrid(x, y);
-        document.getElementById('coordinates').textContent = `X: ${gridPos.x}, Y: ${gridPos.y}`;
+        document.getElementById('coordinates').textContent = `${gridPos.x}, ${gridPos.y}`;
 
-        // Update pixel info position
         this.updatePixelInfoPosition(e.clientX, e.clientY);
 
-        // Only show info if this pixel exists in our metadata
         if (this.pixelMetadata.has(`${gridPos.x},${gridPos.y}`)) {
             this.showPixelInfo(gridPos.x, gridPos.y);
         } else {
@@ -312,6 +316,14 @@ class PixelCanvas {
             this.touchStartY = y;
             this.touchMoved = false;
 
+            if (this.isColorPickerMode) {
+                const gridPos = this.screenToGrid(x, y);
+                if (this.isValidGridPosition(gridPos.x, gridPos.y)) {
+                    this.handlePixelColorPick(gridPos.x, gridPos.y);
+                    this.toggleColorPickerMode();
+                }
+                return;
+            }
         } else if (this.touches.length === 2) {
             this.lastTouchDistance = this.getTouchDistance();
             this.touchStartTime = null;
@@ -320,6 +332,8 @@ class PixelCanvas {
 
     handleTouchMove(e) {
         e.preventDefault();
+        if (this.isColorPickerMode) return;
+
         this.touches = Array.from(e.touches);
 
         if (this.touches.length === 1) {
@@ -342,7 +356,6 @@ class PixelCanvas {
 
                 this.updatePan(x, y);
             }
-
         } else if (this.touches.length === 2) {
             const currentDistance = this.getTouchDistance();
             if (this.lastTouchDistance > 0) {
@@ -360,6 +373,8 @@ class PixelCanvas {
 
     handleTouchEnd(e) {
         e.preventDefault();
+        if (this.isColorPickerMode) return;
+
         this.touches = Array.from(e.touches);
 
         if (this.touches.length === 0) {
@@ -378,7 +393,6 @@ class PixelCanvas {
             this.touchStartTime = null;
             this.touchMoved = false;
             this.lastTouchDistance = 0;
-
         } else if (this.touches.length < 2) {
             this.lastTouchDistance = 0;
         }
@@ -433,7 +447,7 @@ class PixelCanvas {
 
             this.clampOffsets();
 
-            document.getElementById('zoom-level').textContent = `Zoom: ${this.zoom.toFixed(1)}x`;
+            document.getElementById('zoom-level').textContent = `${Math.round(this.zoom * 100)}%`;
             this.render();
         }
     }
@@ -552,17 +566,18 @@ class PixelCanvas {
         }
 
         const pixelKey = `${x},${y}`;
-
         if (this.pixelMetadata.has(pixelKey)) {
             this.pixelInfoTimeout = setTimeout(() => {
                 const data = this.pixelMetadata.get(pixelKey);
                 const pixelInfo = document.getElementById('pixel-info');
 
                 pixelInfo.innerHTML = `
-                    <div><strong>Position:</strong> ${x}, ${y}</div>
-                    <div><strong>Color:</strong> <span style="color:${data.color}">${data.color}</span></div>
-                    <div><strong>Placed by:</strong> ${data.insertedBy || 'Anonymous'}</div>
-                    <div><strong>Last updated:</strong> ${new Date(data.updatedAt).toLocaleString()}</div>
+                    <div class="pixel-color" style="background-color: ${data.color};"></div>
+                    <div class="pixel-details">
+                        <div class="pixel-coords"><strong>Position:</strong> ${x}, ${y}</div>
+                        <div class="pixel-author"><strong>Placed by:</strong> ${data.insertedBy || 'Anonymous'}</div>
+                        <div class="pixel-time"><strong>Last updated:</strong> ${new Date(data.updatedAt).toLocaleString()}</div>
+                    </div>
                 `;
                 pixelInfo.style.display = 'block';
             }, 1000);
@@ -581,55 +596,40 @@ class PixelCanvas {
 
     updatePixelInfoPosition(x, y) {
         const pixelInfo = document.getElementById('pixel-info');
-        pixelInfo.style.left = `${x + 10}px`;
-        pixelInfo.style.top = `${y + 10}px`;
+        const rect = pixelInfo.getBoundingClientRect();
+        
+        let posX = x + 10;
+        let posY = y + 10;
+        
+        if (posX + rect.width > window.innerWidth) {
+            posX = window.innerWidth - rect.width - 10;
+        }
+        
+        if (posY + rect.height > window.innerHeight) {
+            posY = window.innerHeight - rect.height - 10;
+        }
+        
+        pixelInfo.style.left = `${posX}px`;
+        pixelInfo.style.top = `${posY}px`;
+    }
+
+    drawGrid() {
+        // Plain white background
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     render() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawGrid();
-
         this.pixels.forEach((color, key) => {
             const [x, y] = key.split(',').map(Number);
             this.renderPixel(x, y, color);
         });
     }
 
-    drawGrid() {
-        const scaledPixelSize = this.pixelSize * this.zoom;
-
-        if (scaledPixelSize < 2) return;
-
-        this.ctx.strokeStyle = '#ddd';
-        this.ctx.lineWidth = 1;
-
-        const canvasWidth = this.gridSize * this.pixelSize * this.zoom;
-        const canvasHeight = this.gridSize * this.pixelSize * this.zoom;
-        const centerX = (this.canvas.width - canvasWidth) / 2;
-        const centerY = (this.canvas.height - canvasHeight) / 2;
-
-        const startX = Math.floor((centerX + this.viewportX - this.offsetX) / scaledPixelSize) * scaledPixelSize + this.offsetX;
-        const startY = Math.floor((centerY + this.viewportY - this.offsetY) / scaledPixelSize) * scaledPixelSize + this.offsetY;
-
-        this.ctx.beginPath();
-
-        for (let x = startX; x < this.canvas.width; x += scaledPixelSize) {
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.canvas.height);
-        }
-
-        for (let y = startY; y < this.canvas.height; y += scaledPixelSize) {
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.canvas.width, y);
-        }
-
-        this.ctx.stroke();
-    }
-
     renderPixel(gridX, gridY, color) {
         const screenPos = this.gridToScreen(gridX, gridY);
         const size = this.pixelSize * this.zoom;
-
         this.ctx.fillStyle = color;
         this.ctx.fillRect(screenPos.x, screenPos.y, size, size);
     }
@@ -637,11 +637,92 @@ class PixelCanvas {
     clearPixel(gridX, gridY) {
         const screenPos = this.gridToScreen(gridX, gridY);
         const size = this.pixelSize * this.zoom;
-
         this.ctx.clearRect(screenPos.x, screenPos.y, size, size);
-        this.ctx.strokeStyle = '#ddd';
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(screenPos.x, screenPos.y, size, size);
+    }
+
+    connectWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}`;
+
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+            this.connected = true;
+            this.updateConnectionStatus();
+        };
+
+        this.ws.onclose = () => {
+            this.connected = false;
+            this.updateConnectionStatus();
+            setTimeout(() => this.connectWebSocket(), 3000);
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            this.connected = false;
+            this.updateConnectionStatus();
+        };
+
+        this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleWebSocketMessage(data);
+        };
+    }
+
+    handleWebSocketMessage(data) {
+        switch (data.type) {
+            case 'pixel_update':
+                this.updatePixel(data.x, data.y, data.color, {
+                    color: data.color,
+                    insertedBy: data.insertedBy,
+                    updatedAt: data.updatedAt
+                });
+                break;
+            case 'pixel_delete':
+                this.deletePixel(data.x, data.y);
+                break;
+            case 'user_count':
+                this.userCount = data.count;
+                document.getElementById('users-count').textContent = `${data.count} online`;
+                break;
+        }
+    }
+
+    updateConnectionStatus() {
+        const statusEl = document.querySelector('.status-indicator');
+        const connectionText = document.getElementById('users-count');
+
+        if (!statusEl || !connectionText) return;
+
+        if (this.connected) {
+            statusEl.className = 'status-indicator connected';
+        } else {
+            statusEl.className = 'status-indicator disconnected';
+            connectionText.textContent = 'offline';
+        }
+    }
+
+    async loadPixels() {
+        try {
+            const response = await fetch('/api/pixels-with-metadata');
+            const pixels = await response.json();
+
+            this.pixels.clear();
+            this.pixelMetadata.clear();
+
+            pixels.forEach(pixel => {
+                this.pixels.set(`${pixel.x},${pixel.y}`, pixel.color);
+                this.pixelMetadata.set(`${pixel.x},${pixel.y}`, {
+                    color: pixel.color,
+                    insertedBy: pixel.insertedBy,
+                    updatedAt: pixel.updatedAt
+                });
+            });
+
+            this.render();
+        } catch (error) {
+            console.error('Failed to load pixels:', error);
+        }
     }
 }
 

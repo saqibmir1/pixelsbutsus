@@ -182,6 +182,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .tool-btn {
@@ -206,6 +207,11 @@ body {
 
 .tool-btn:active {
     transform: translateY(0);
+}
+
+.tool-btn.active {
+    background-color: var(--primary-800);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tool-btn i {
@@ -237,105 +243,12 @@ body {
     transform: scale(1.05);
 }
 
-/* Color Palette */
-.color-palette-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-.palette-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.palette-header span {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.palette-actions {
-    display: flex;
-    gap: 0.25rem;
-}
-
-.palette-scroll-btn {
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast) ease;
-}
-
-.palette-scroll-btn:hover {
-    background-color: var(--border-light);
-    color: var(--text-primary);
-}
-
-.palette-scroll-btn i {
-    font-size: 0.75rem;
-}
-
-.color-palette {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--gray-300) var(--gray-100);
-}
-
-.color-group {
-    display: flex;
-    gap: 0.25rem;
-    padding: 0.25rem;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-sm);
-}
-
-.color {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast) ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
-}
-
-.color:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-sm);
-}
-
-.color.selected {
-    transform: scale(1.15);
-    box-shadow: 0 0 0 2px white, 0 0 0 3px var(--primary-500);
-    z-index: 1;
-}
-
 /* Canvas Container */
 .canvas-container {
     flex: 1;
     position: relative;
     overflow: hidden;
     background-color: white;
-    /* background-image: 
-        linear-gradient(45deg, var(--gray-100) 25%, transparent 25%),
-        linear-gradient(-45deg, var(--gray-100) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, var(--gray-100) 75%),
-        linear-gradient(-45deg, transparent 75%, var(--gray-100) 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px; */
 }
 
 #pixel-canvas {
@@ -468,7 +381,7 @@ body {
 }
 
 .modal-body {
-    padding: 0 1.5rem;
+    padding: 0 1.5rem 1.5rem;
 }
 
 .input-group {
@@ -537,6 +450,59 @@ body {
     transform: translateY(0);
 }
 
+/* Color Picker Modal */
+#color-picker-modal .modal-content {
+    width: 300px;
+    padding: 1.5rem;
+}
+
+#color-picker-modal .modal-header {
+    padding: 0 0 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#color-picker-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#color-wheel {
+    width: 100%;
+    height: 50px;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.color-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+#color-hex-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast) ease;
+}
+
+#color-hex-input:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+.color-picker-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Pixel Info Tooltip */
 .pixel-info {
     position: absolute;
@@ -591,6 +557,21 @@ body {
     font-size: 0.75rem;
 }
 
+/* Color picker mode indicator */
+.color-picker-mode {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    z-index: 1000;
+    display: none;
+    pointer-events: none;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 0.5rem;
@@ -640,6 +621,32 @@ body {
     .mobile-only {
         display: flex;
     }
+
+    /* Mobile-specific color picker styles */
+    #color-picker-modal .modal-content {
+        width: 90% !important;
+        max-width: 320px;
+    }
+    
+    .color-picker-mode {
+        font-size: 14px;
+        padding: 6px 12px;
+        top: 60px;
+    }
+    
+    #color-wheel {
+        height: 60px;
+    }
+    
+    #color-hex-input {
+        padding: 0.5rem;
+        font-size: 16px;
+    }
+    
+    #confirm-color-btn {
+        padding: 0.5rem 1rem;
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -660,10 +667,14 @@ body {
     
     .tool-section {
         flex-wrap: wrap;
+        gap: 0.75rem;
     }
     
     .selected-color-display {
         margin-left: 0;
+        order: 1;
+        width: 100%;
+        justify-content: flex-end;
     }
     
     .footer {
