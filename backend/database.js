@@ -139,6 +139,23 @@ async function getPixelCount() {
     }
 }
 
+// Get leaderboard data
+async function getLeaderboard() {
+    try {
+        const result = await pool.query(`
+            SELECT inserted_by AS name, COUNT(*) AS pixel_count
+            FROM pixels
+            GROUP BY inserted_by
+            ORDER BY pixel_count DESC
+            LIMIT 10
+        `);
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     pool,
     initializeDatabase,
@@ -148,4 +165,5 @@ module.exports = {
     deletePixel,
     clearAllPixels,
     getPixelCount,
+    getLeaderboard,
 };

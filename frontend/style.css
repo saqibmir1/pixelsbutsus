@@ -674,6 +674,40 @@ body {
     pointer-events: none;
 }
 
+/* leaderboard */
+#leaderboard-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-secondary);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-md);
+    z-index: 100;
+    width: 90%;
+    max-width: 500px;
+}
+
+#leaderboard-modal .modal-content {
+    padding: 1.5rem;
+}
+
+#leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#leaderboard-table th, #leaderboard-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#leaderboard-table th {
+    background-color: var(--bg-tertiary);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 0.5rem;

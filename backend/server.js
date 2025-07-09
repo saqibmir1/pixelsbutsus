@@ -9,7 +9,8 @@ const {
     getPixelInfo,
     setPixel, 
     deletePixel, 
-    getPixelCount 
+    getPixelCount,
+    getLeaderboard 
 } = require('./database');
 
 require('dotenv').config();
@@ -195,6 +196,17 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         activeConnections: clients.size
     });
+});
+
+// Leaderboard API route
+app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const leaderboard = await getLeaderboard();
+        res.json(leaderboard);
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ error: 'Failed to fetch leaderboard' });
+    }
 });
 
 // Serve frontend

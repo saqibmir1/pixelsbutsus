@@ -82,6 +82,10 @@
                 </div>
             </div>
             <div class="footer-right">
+                                <button class="footer-btn" id="leaderboard-btn">
+                    <i class="fas fa-trophy"></i>
+                    <span>Leaderboard</span>
+                </button>
                 <button class="footer-btn" id="help-btn">
                     <i class="fas fa-question-circle"></i>
                     <span>Help</span>
@@ -116,6 +120,32 @@
             </div>
         </div>
     </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Leaderboard</h2>
+            </div>
+            <div class="modal-body">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Pixels Placed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Leaderboard rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button id="close-leaderboard" class="primary-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Color Picker Modal -->
     <div id="color-picker-modal" class="modal">

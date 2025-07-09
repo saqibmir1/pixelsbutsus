@@ -131,6 +131,41 @@ class PixelCanvas {
         this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
         this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
         this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+
+        // Leaderboard button
+        document.getElementById('leaderboard-btn').addEventListener('click', async () => {
+            const modal = document.getElementById('leaderboard-modal');
+            const tableBody = document.getElementById('leaderboard-table').querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear previous data
+
+            try {
+                const response = await fetch('/api/leaderboard');
+                if (!response.ok) throw new Error('Failed to fetch leaderboard');
+                const leaderboard = await response.json();
+
+                leaderboard.forEach((entry) => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const countCell = document.createElement('td');
+
+                    nameCell.textContent = entry.name;
+                    countCell.textContent = entry.pixel_count;
+
+                    row.appendChild(nameCell);
+                    row.appendChild(countCell);
+                    tableBody.appendChild(row);
+                });
+
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                alert('Failed to load leaderboard');
+            }
+        });
+
+        document.getElementById('close-leaderboard').addEventListener('click', () => {
+            document.getElementById('leaderboard-modal').style.display = 'none';
+        });
     }
 
     setupColorPicker() {
