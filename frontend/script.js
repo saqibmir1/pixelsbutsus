@@ -794,4 +794,8 @@ class ChatWidget {
 document.addEventListener('DOMContentLoaded', () => {
     new PixelCanvas();
     new ChatWidget();
+
+    // Ensure leaderboard modal is hidden on page load
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    leaderboardModal.style.display = 'none';
 });
